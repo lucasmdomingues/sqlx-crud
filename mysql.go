@@ -4,17 +4,25 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 var conn *sql.DB = makeConnetion()
 
+type User struct {
+	Id       int64
+	Username string
+	Password string
+}
+
 func makeConnetion() *sql.DB {
 
-	username := ""
+	username := "root"
 	password := ""
-	host := ""
-	port := ""
-	database := ""
+	host := "localhost"
+	port := "3306"
+	database := "orcamentoja.kouda_db"
 
 	connURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, database)
 
@@ -25,7 +33,7 @@ func makeConnetion() *sql.DB {
 	return conn
 }
 
-func Insert() error {
+func Insert(user User) error {
 
 	tx, err := conn.Begin()
 	if err != nil {
@@ -39,7 +47,7 @@ func Insert() error {
 		return err
 	}
 
-	_, err = tx.Exec("user", "password")
+	_, err = tx.Exec(user.Username, user.Password)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -49,7 +57,7 @@ func Insert() error {
 	return nil
 }
 
-func Update(id int) error {
+func Update(user User, idUser int) error {
 
 	tx, err := conn.Begin()
 	if err != nil {
@@ -63,7 +71,7 @@ func Update(id int) error {
 		return err
 	}
 
-	_, err = tx.Exec("newusername", "newpassoword", id)
+	_, err = tx.Exec(user.Username, user.Password, idUser)
 	if err != nil {
 		tx.Rollback()
 		return err
@@ -88,65 +96,61 @@ func SelectAll() error {
 
 	for rows.Next() {
 
-		var id int
-		var username string
-		var password string
+		var user User
 
-		err = rows.Scan(&id, &username, &password)
+		err = rows.Scan(&user.Id, &user.Username, &user.Password)
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 
-		fmt.Println(id)
-		fmt.Println(username)
-		fmt.Println(password)
+		fmt.Println(user.Id)
+		fmt.Println(user.Username)
+		fmt.Println(user.Password)
 	}
 
 	tx.Commit()
 	return nil
 }
 
-func SelectWhere(id int) error {
+func SelectWhere(idUser int) error {
 
 	tx, err := conn.Begin()
 	if err != nil {
 		return err
 	}
 
-	rows, err := tx.Query("SELECT * tb_users WHERE id=?", id)
+	rows, err := tx.Query("SELECT * tb_users WHERE id=?", idUser)
 	if err != nil {
 		return err
 	}
 
 	for rows.Next() {
 
-		var id int
-		var username string
-		var password string
+		var user User
 
-		err = rows.Scan(&id, &username, &password)
+		err = rows.Scan(&user.Id, &user.Username, &user.Password)
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
 
-		fmt.Println(id)
-		fmt.Println(username)
-		fmt.Println(password)
+		fmt.Println(user.Id)
+		fmt.Println(user.Username)
+		fmt.Println(user.Password)
 	}
 
 	tx.Commit()
 	return nil
 }
 
-func Delete(id int) error {
+func Delete(idUser int) error {
 	stmt, err := conn.Prepare("DELETE FROM tb_users WHERE id=?")
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(id)
+	_, err = stmt.Exec(idUser)
 	if err != nil {
 		return err
 	}
