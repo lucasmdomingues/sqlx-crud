@@ -18,11 +18,11 @@ type User struct {
 
 func makeConnetion() *sql.DB {
 
-	username := "root"
+	username := ""
 	password := ""
-	host := "localhost"
-	port := "3306"
-	database := "orcamentoja.kouda_db"
+	host := ""
+	port := ""
+	database := ""
 
 	connURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, database)
 
