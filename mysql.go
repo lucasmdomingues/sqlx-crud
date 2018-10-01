@@ -3,12 +3,19 @@ package mysql
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	_ "github.com/go-sql-driver/mysql"
 )
 
 var conn *sql.DB = makeConnetion()
+
+type Connection struct {
+	Username string
+	Password string
+	Host     string
+	Port     string
+	Database string
+}
 
 type User struct {
 	Id       int64
@@ -18,18 +25,21 @@ type User struct {
 
 func makeConnetion() *sql.DB {
 
-	username := ""
-	password := ""
-	host := ""
-	port := ""
-	database := ""
-
-	connURL := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", username, password, host, port, database)
-
-	conn, err := sql.Open("mysql", connURL)
-	if err != nil {
-		log.Printf("%s", err)
+	c := Connection{
+		"username",
+		"password",
+		"host",
+		"port",
+		"database",
 	}
+
+	url := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", c.Username, c.Password, c.Host, c.Port, c.Database)
+
+	conn, err := sql.Open("mysql", url)
+	if err != nil {
+		return nil
+	}
+
 	return conn
 }
 
@@ -41,19 +51,17 @@ func Insert(user User) error {
 		return err
 	}
 
-	_, err = tx.Prepare("INSERT INTO tb_users(username,password) VALUES(?,?)")
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+	query := "INSERT INTO tb_users(username,password) VALUES(?,?)"
 
-	_, err = tx.Exec(user.Username, user.Password)
+	_, err = tx.Exec(query, user.Username, user.Password)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	tx.Commit()
+	conn.Close()
+
 	return nil
 }
 
@@ -65,19 +73,17 @@ func Update(user User, idUser int) error {
 		return err
 	}
 
-	_, err = tx.Prepare("update tb_users set username=?,password=? where uid=?")
-	if err != nil {
-		tx.Rollback()
-		return err
-	}
+	query := "update tb_users set username=?,password=? where uid=?"
 
-	_, err = tx.Exec(user.Username, user.Password, idUser)
+	_, err = tx.Exec(query, user.Username, user.Password, idUser)
 	if err != nil {
 		tx.Rollback()
 		return err
 	}
 
 	tx.Commit()
+	conn.Close()
+
 	return nil
 }
 
@@ -110,6 +116,8 @@ func SelectAll() error {
 	}
 
 	tx.Commit()
+	conn.Close()
+
 	return nil
 }
 
@@ -141,19 +149,28 @@ func SelectWhere(idUser int) error {
 	}
 
 	tx.Commit()
+	conn.Close()
+
 	return nil
 }
 
 func Delete(idUser int) error {
-	stmt, err := conn.Prepare("DELETE FROM tb_users WHERE id=?")
+
+	tx, err := conn.Begin()
 	if err != nil {
 		return err
 	}
 
-	_, err = stmt.Exec(idUser)
+	query := "DELETE FROM tb_users WHERE id=?"
+
+	_, err = tx.Exec(query, idUser)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
+
+	tx.Commit()
+	conn.Close()
 
 	return nil
 }
