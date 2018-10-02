@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-var urlConnection = makeURLConnetion()
+var conn = makeConnection()
 
 type Connection struct {
 	Username string
@@ -15,7 +15,7 @@ type Connection struct {
 	Database string
 }
 
-func makeURLConnetion() string {
+func makeConnection() *sql.DB {
 
 	c := Connection{
 		"root",
@@ -27,19 +27,13 @@ func makeURLConnetion() string {
 
 	url := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", c.Username, c.Password, c.Host, c.Port, c.Database)
 
-	return url
-}
-
-func makeConnection() *sql.DB {
-	conn, err := sql.Open("mysql", urlConnection)
+	conn, err := sql.Open("mysql", url)
 	if err != nil {
 		return nil
 	}
 
 	return conn
 }
-
-var conn = makeConnection()
 
 func closeConnetion(conn *sql.DB) {
 	conn.Close()
