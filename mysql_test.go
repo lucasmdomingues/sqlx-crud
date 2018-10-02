@@ -15,7 +15,7 @@ func TestInsert(t *testing.T) {
 
 	err := mysql.Insert(&user)
 	if err != nil {
-		t.Errorf("Error: %v", err)
+		t.Fatalf("Error: %v", err)
 		return
 	}
 }
@@ -24,7 +24,7 @@ func TestSelectAll(t *testing.T) {
 
 	_, err := mysql.SelectAll()
 	if err != nil {
-		t.Errorf("Error: %v", err)
+		t.Fatalf("Error: %v", err)
 		return
 	}
 }
@@ -39,7 +39,7 @@ func TestUpdate(t *testing.T) {
 
 	err := mysql.Update(&user, 0)
 	if err != nil {
-		t.Errorf("Error: %v", err)
+		t.Fatalf("Error: %v", err)
 		return
 	}
 }
@@ -48,7 +48,7 @@ func TestSelectWhere(t *testing.T) {
 
 	_, err := mysql.SelectWhere(0)
 	if err != nil {
-		t.Errorf("Error: %v", err)
+		t.Fatalf("Error: %v", err)
 		return
 	}
 }
@@ -57,7 +57,7 @@ func TestDelete(t *testing.T) {
 
 	err := mysql.Delete(0)
 	if err != nil {
-		t.Errorf("Error: %v", err)
+		t.Fatalf("Error: %v", err)
 		return
 	}
 }
