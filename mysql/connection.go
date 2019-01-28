@@ -18,11 +18,11 @@ type Connection struct {
 func makeConnection() *sql.DB {
 
 	c := Connection{
-		"root",
-		"",
-		"localhost",
-		"3306",
-		"db_users",
+		Username: "root",
+		Password: "",
+		Host:     "localhost",
+		Port:     "3306",
+		Database: "db_users",
 	}
 
 	url := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", c.Username, c.Password, c.Host, c.Port, c.Database)

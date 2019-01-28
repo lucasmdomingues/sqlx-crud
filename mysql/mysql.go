@@ -72,33 +72,25 @@ func SelectAll() ([]User, error) {
 
 	conn := makeConnection()
 
-	tx, err := conn.Begin()
+	rows, err := conn.Query("SELECT * FROM tb_users")
 	if err != nil {
-		return nil, err
-	}
-
-	rows, err := tx.Query("SELECT * FROM tb_users")
-	if err != nil {
-		tx.Rollback()
 		return nil, err
 	}
 
 	users := []User{}
+
+	defer closeConnetion(conn)
 	for rows.Next() {
 
 		user := User{}
 
 		err = rows.Scan(&user.Id, &user.Username, &user.Password)
 		if err != nil {
-			tx.Rollback()
 			return nil, err
 		}
 
 		users = append(users, user)
 	}
-
-	defer closeConnetion(conn)
-	tx.Commit()
 
 	return users, nil
 }
@@ -107,12 +99,7 @@ func SelectWhere(idUser int) (*User, error) {
 
 	conn := makeConnection()
 
-	tx, err := conn.Begin()
-	if err != nil {
-		return nil, err
-	}
-
-	stmt, err := tx.Prepare("SELECT * FROM tb_users WHERE id=?")
+	stmt, err := conn.Prepare("SELECT * FROM tb_users WHERE id=?")
 	if err != nil {
 		return nil, err
 	}
@@ -123,16 +110,14 @@ func SelectWhere(idUser int) (*User, error) {
 	}
 
 	user := User{}
+
+	defer closeConnetion(conn)
 	for rows.Next() {
 		err = rows.Scan(&user.Id, &user.Username, &user.Password)
 		if err != nil {
-			tx.Rollback()
 			return nil, err
 		}
 	}
-
-	defer closeConnetion(conn)
-	tx.Commit()
 
 	return &user, nil
 }
