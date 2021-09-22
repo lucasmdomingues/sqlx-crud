@@ -2,7 +2,7 @@
 <p>
 </p>
 
-> A simple create, update, read and delete using sqlx
+> A simple create, read, update and delete using sqlx
 
 ## Install
 
